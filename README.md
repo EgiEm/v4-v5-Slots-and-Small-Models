@@ -1,22 +1,24 @@
 # v4+v5 Slots & Small Models
 
-Week 5 implementation of slot extraction, relative date-time normalization, and schema validation gate.
+Build Your Own AI Router — Week 5: Slots & Small Models implementation repository.
 
 ---
 
-## Days Overview
+## 📌 Repository Overview
 
-- **Day 1:** Slot Schemas & Rule-based Entity Extractor (`Day 1/`)
-- **Day 2:** Deterministic Date-Time Resolver (`Day 2/`)
-- **Day 3:** Validate the Slots — The Schema Gate (`Day 3/`)
+This repository contains the full source code and documentation for Week 5 tasks:
+
+- 🟢 **Day 1:** Slot Schemas & Rule-Based Entity Extraction (`Day 1/`)
+- 🔵 **Day 2:** Deterministic Relative Date-Time Resolver (`Day 2/`)
+- 🟣 **Day 3:** Validate the Slots — The Schema Gate (`Day 3/`)
 
 ---
 
-## Day 3: Schema Gate Summary
+## 🛡️ Day 3: Validate the Slots — The Schema Gate
 
-Typed schema validator contract for all six Week-2 intents (`create_task`, `place_call`, `answer_question`, `save_memory`, `set_timer`, `out_of_scope`).
+A from-scratch typed schema validator and safety checkpoint positioned between the slot extractor and tool executor. It intercepts and rejects malformed candidate `(action, slots)` records before they can reach the executor or trigger real-world tool failures.
 
-### Intent Schema Table
+### Intent Schema Contract
 
 | Intent | Required Slots | Optional Slots | Types & Constraints |
 |---|---|---|---|
@@ -29,34 +31,25 @@ Typed schema validator contract for all six Week-2 intents (`create_task`, `plac
 
 ---
 
-## Repository Structure
+### The 5 Validation Rules
 
-```
-.
-├── README.md
-├── Day 1/
-│   ├── slot_schema.py
-│   ├── entity_extractor.py
-│   └── main.py
-├── Day 2/
-│   ├── date_resolver.py
-│   ├── main.py
-│   └── README.md
-└── Day 3/
-    ├── schema_validator.py
-    ├── main.py
-    └── README.md
-```
+The `validate(action, slots)` gate enforces rules in strict dependency order:
+
+1. **Unknown Intent Rejection:** Immediately rejects any `action` not present in `SCHEMA`.
+2. **Required-Field Presence:** Ensures mandatory slots exist and are non-null.
+3. **Type Enforcement:** Verifies slot values match Python types (`str`, `int`, `float`), guarding against Python's `bool` subclassing `int`.
+4. **ISO 8601 Format Check:** Validates date fields against strict `YYYY-MM-DDThh:mm:ss` pattern (`ISO_RE`).
+5. **Range & Value Constraints:** Enforces business logic (`duration_seconds > 0`, `amount >= 0`).
+
+Returns `(ok: bool, errors: list[str])` where `errors` is deterministically sorted.
 
 ---
 
-## Running Day 3 Validator
+### Test Suite Execution & Output
 
 ```bash
 python "Day 3/main.py"
 ```
-
-### Day 3 Test Suite Output Example
 
 ```text
 ======================================================================
@@ -77,4 +70,38 @@ python "Day 3/main.py"
 ----------------------------------------------------------------------
 Summary: 6 PASSED | 6 REJECTED | Total: 12
 ======================================================================
+```
+
+---
+
+## 📁 Repository Structure
+
+```
+.
+├── README.md
+├── Day 1/
+│   ├── slot_schema.py
+│   ├── entity_extractor.py
+│   └── main.py
+├── Day 2/
+│   ├── date_resolver.py
+│   └── main.py
+└── Day 3/
+    ├── schema_validator.py
+    └── main.py
+```
+
+---
+
+## 🚀 Running All Days
+
+```bash
+# Day 1 - Entity Extraction
+python "Day 1/main.py"
+
+# Day 2 - Date Resolver
+python "Day 2/main.py"
+
+# Day 3 - Schema Gate Validator
+python "Day 3/main.py"
 ```
