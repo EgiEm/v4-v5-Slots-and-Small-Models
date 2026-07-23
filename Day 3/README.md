@@ -1,22 +1,8 @@
-# v4+v5 Slots & Small Models
+# Day 3: Validate the Slots — The Schema Gate
 
-Week 5 implementation of slot extraction, relative date-time normalization, and schema validation gate.
+A typed schema gate validator implemented from scratch to ensure malformed slot records are intercepted before reaching the executor.
 
----
-
-## Days Overview
-
-- **Day 1:** Slot Schemas & Rule-based Entity Extractor (`Day 1/`)
-- **Day 2:** Deterministic Date-Time Resolver (`Day 2/`)
-- **Day 3:** Validate the Slots — The Schema Gate (`Day 3/`)
-
----
-
-## Day 3: Schema Gate Summary
-
-Typed schema validator contract for all six Week-2 intents (`create_task`, `place_call`, `answer_question`, `save_memory`, `set_timer`, `out_of_scope`).
-
-### Intent Schema Table
+## Part A: Full Intent Schema Contract
 
 | Intent | Required Slots | Optional Slots | Types & Constraints |
 |---|---|---|---|
@@ -29,34 +15,23 @@ Typed schema validator contract for all six Week-2 intents (`create_task`, `plac
 
 ---
 
-## Repository Structure
+## Part B: The 5 Validation Rules
 
-```
-.
-├── README.md
-├── Day 1/
-│   ├── slot_schema.py
-│   ├── entity_extractor.py
-│   └── main.py
-├── Day 2/
-│   ├── date_resolver.py
-│   ├── main.py
-│   └── README.md
-└── Day 3/
-    ├── schema_validator.py
-    ├── main.py
-    └── README.md
-```
+The `validate(action, slots)` function evaluates records strictly in dependency order:
+
+1. **Unknown Intent Rejection:** Rejects immediately if `action` is not defined in `SCHEMA`.
+2. **Required Slot Presence:** Checks that every mandatory slot for the given intent is present and non-null.
+3. **Type Enforcement:** Verifies that slot values match expected Python types (`str`, `int`, `float`), explicitly guarding against Python's `bool` subclassing `int`.
+4. **ISO 8601 Date Check:** Verifies date slots match strict ISO 8601 format (`YYYY-MM-DDThh:mm:ss`) via regex pattern matching.
+5. **Range & Value Constraints:** Validates domain logic constraints such as `duration_seconds > 0` for timers and `amount >= 0` for expense/memory entries.
+
+The validator returns a tuple `(ok: bool, errors: list[str])`, where `errors` is deterministically sorted.
 
 ---
 
-## Running Day 3 Validator
+## Test Output & Stressed Validation Suite
 
-```bash
-python "Day 3/main.py"
-```
-
-### Day 3 Test Suite Output Example
+Running `python "Day 3/main.py"` executes 12 test cases (6 valid, 6 broken):
 
 ```text
 ======================================================================
@@ -77,4 +52,12 @@ python "Day 3/main.py"
 ----------------------------------------------------------------------
 Summary: 6 PASSED | 6 REJECTED | Total: 12
 ======================================================================
+```
+
+---
+
+## How to Run
+
+```bash
+python "Day 3/main.py"
 ```
